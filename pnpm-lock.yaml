@@ -15,7 +15,7 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
-  apps/api:
+  apps/backend:
     dependencies:
       '@nestjs/axios':
         specifier: ^4.0.0
@@ -103,7 +103,7 @@ importers:
         specifier: ^5.6.3
         version: 5.9.3
 
-  apps/web:
+  apps/frontend:
     dependencies:
       '@vitejs/plugin-react':
         specifier: ^4.3.4

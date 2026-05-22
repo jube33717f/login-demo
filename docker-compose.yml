@@ -12,13 +12,13 @@ services:
       timeout: 3s
       retries: 10
 
-  api:
+  backend:
     profiles: ["full"]
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
+      dockerfile: apps/backend/Dockerfile
     env_file:
-      - apps/api/.env
+      - apps/backend/.env
     environment:
       APP_PORT: "3000"
       REDIS_URL: redis://redis:6379
@@ -30,19 +30,19 @@ services:
       redis:
         condition: service_healthy
 
-  web:
+  frontend:
     profiles: ["full"]
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/frontend/Dockerfile
     env_file:
-      - apps/web/.env
+      - apps/frontend/.env
     environment:
       VITE_API_BASE_URL: ""
     ports:
       - "4200:4200"
     depends_on:
-      - api
+      - backend
 
 volumes:
   redis-data:

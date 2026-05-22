@@ -4,8 +4,8 @@ This repository implements an enterprise interview exercise for OAuth 2.0 / OIDC
 
 The project is a pnpm workspace with two applications:
 
-- `apps/web`: Vite, React, TypeScript, CSS Modules
-- `apps/api`: NestJS, TypeScript, Redis-backed session and OAuth transaction storage
+- `apps/frontend`: Vite, React, TypeScript, CSS Modules
+- `apps/backend`: NestJS, TypeScript, Redis-backed session and OAuth transaction storage
 
 The browser entry point is always:
 
@@ -36,26 +36,26 @@ http://localhost:4200
 ```bash
 pnpm install
 pnpm docker:redis
-pnpm dev:api
-pnpm dev:web
+pnpm dev:backend
+pnpm dev:frontend
 ```
 
 Useful scripts:
 
 ```bash
-pnpm build:api
-pnpm build:web
-pnpm test:api
-pnpm test:web
-pnpm test:e2e:api
-pnpm test:e2e:web
+pnpm build:backend
+pnpm build:frontend
+pnpm test:backend
+pnpm test:frontend
+pnpm test:e2e:backend
+pnpm test:e2e:frontend
 pnpm docker:up
 pnpm docker:down
 ```
 
 ## Environment
 
-Backend environment defaults live in `apps/api/.env.example`.
+Backend environment defaults live in `apps/backend/.env.example`.
 
 ```bash
 APP_PORT=3000
@@ -73,7 +73,7 @@ REDIS_PASSWORD=
 OAUTH_TRANSACTION_TTL_SECONDS=600
 ```
 
-Frontend environment defaults live in `apps/web/.env.example`.
+Frontend environment defaults live in `apps/frontend/.env.example`.
 
 ```bash
 VITE_APP_BASE_URL=http://localhost:4200
@@ -83,7 +83,7 @@ VITE_E2E=false
 
 ## Development Mode
 
-Recommended day-to-day development uses Docker only for Redis. Run the API and web apps locally so NestJS logs, Vite logs, breakpoints, and hot reload remain easy to inspect.
+Recommended day-to-day development uses Docker only for Redis. Run the API and frontend apps locally so NestJS logs, Vite logs, breakpoints, and hot reload remain easy to inspect.
 
 Terminal 1:
 
@@ -95,13 +95,13 @@ docker compose logs -f redis
 Terminal 2:
 
 ```bash
-pnpm dev:api
+pnpm dev:backend
 ```
 
 Terminal 3:
 
 ```bash
-pnpm dev:web
+pnpm dev:frontend
 ```
 
 Open:
@@ -121,13 +121,13 @@ pnpm docker:up
 This starts:
 
 - `redis` on port `6379`
-- `api` on port `3000`
-- `web` on port `4200`
+- `backend` on port `3000`
+- `frontend` on port `4200`
 
 View logs:
 
 ```bash
-docker compose logs -f web api redis
+docker compose logs -f frontend backend redis
 ```
 
 Stop everything:
@@ -163,7 +163,7 @@ PONG
 
 1. The user opens `http://localhost:4200`.
 2. The user clicks `Login`.
-3. The web app navigates to `/login`.
+3. The frontend app navigates to `/login`.
 4. The API generates `state`, `code_verifier`, and `code_challenge`.
 5. The API stores the login transaction in Redis.
 6. The API redirects the browser to the IdP authorization endpoint.
@@ -172,7 +172,7 @@ PONG
 9. The API exchanges the code with the original `code_verifier`.
 10. The API validates the ID token signature and claims.
 11. The API creates a Redis-backed session and sets an HttpOnly cookie.
-12. The web app calls `/me` and `/api/data`.
+12. The frontend app calls `/me` and `/api/data`.
 
 ## Token Storage
 
@@ -192,25 +192,25 @@ Local development uses HTTP, so `SESSION_SECURE_COOKIE=false`. Production enviro
 Backend unit tests:
 
 ```bash
-pnpm test:api
+pnpm test:backend
 ```
 
 Backend e2e tests:
 
 ```bash
-pnpm test:e2e:api
+pnpm test:e2e:backend
 ```
 
 Frontend unit tests:
 
 ```bash
-pnpm test:web
+pnpm test:frontend
 ```
 
 Frontend Playwright tests:
 
 ```bash
-pnpm test:e2e:web
+pnpm test:e2e:frontend
 ```
 
 ## Test Account
