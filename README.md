@@ -55,6 +55,15 @@ pnpm docker:down
 
 ## Environment
 
+Environment files are intentionally simple for this demo. Each app has one checked-in example file and one local runtime file:
+
+- `apps/backend/.env.example`: backend template committed to the repository
+- `apps/backend/.env`: backend local runtime values used by NestJS and Docker Compose
+- `apps/frontend/.env.example`: frontend template committed to the repository
+- `apps/frontend/.env`: frontend local runtime values used by Vite and Docker Compose
+
+Do not commit secrets, passwords, personal test accounts, or e2e-only env files. Use `.env.local` for local-only overrides when needed. The repository ignores `.env.local`, `.env.e2e`, and `.env.e2e.local` files.
+
 Backend environment defaults live in `apps/backend/.env.example`.
 
 ```bash
@@ -73,12 +82,46 @@ REDIS_PASSWORD=
 OAUTH_TRANSACTION_TTL_SECONDS=600
 ```
 
+Backend variables:
+
+| Variable | Purpose |
+| --- | --- |
+| `SERVICE` | Service name used for logging and diagnostics. |
+| `APP_PORT` | Backend HTTP port. Local development uses `3000`. |
+| `FRONTEND_ORIGIN` | Allowed browser origin for CORS and redirects. Local development uses `http://localhost:4200`. |
+| `OIDC_DISCOVERY_URL` | IdP OIDC discovery document URL. |
+| `OIDC_CLIENT_ID` | Public OAuth client ID registered with the IdP. |
+| `OIDC_REDIRECT_URI` | Redirect URI registered with the IdP. It must match the IdP configuration exactly. |
+| `OIDC_SCOPES` | Space-separated OAuth scopes requested during login. |
+| `SESSION_COOKIE_NAME` | HttpOnly session cookie name. |
+| `SESSION_TTL_SECONDS` | Session TTL used by Redis or the in-memory fallback. |
+| `SESSION_SECURE_COOKIE` | Set to `true` behind HTTPS in production-like environments. Use `false` for local HTTP development. |
+| `SESSION_STORE` | Session backend. Use `redis` for normal local development. `memory` is only for isolated tests. |
+| `REDIS_URL` | Redis connection URL. Local Docker Redis uses `redis://localhost:6379`; full Docker mode uses `redis://redis:6379`. |
+| `REDIS_PASSWORD` | Redis password when the Redis instance requires authentication. Leave empty for the provided local Docker Redis. |
+| `OAUTH_TRANSACTION_TTL_SECONDS` | TTL for short-lived OAuth state and PKCE transaction data. |
+
 Frontend environment defaults live in `apps/frontend/.env.example`.
 
 ```bash
 VITE_APP_BASE_URL=http://localhost:4200
 VITE_API_BASE_URL=
 VITE_E2E=false
+```
+
+Frontend variables:
+
+| Variable | Purpose |
+| --- | --- |
+| `VITE_APP_BASE_URL` | Browser-facing frontend origin. Local development uses `http://localhost:4200`. |
+| `VITE_API_BASE_URL` | API base URL used by the frontend. Leave empty when Vite proxies API requests to the backend. |
+| `VITE_E2E` | Enables frontend test-only UI behavior when explicitly set to `true`. Keep `false` for normal development. |
+
+For local setup, copy the example files once and adjust values only if your IdP registration or ports differ:
+
+```bash
+cp apps/backend/.env.example apps/backend/.env
+cp apps/frontend/.env.example apps/frontend/.env
 ```
 
 ## Development Mode
