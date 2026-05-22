@@ -8,6 +8,9 @@ const config: Config = {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
   testEnvironment: 'node',
+  moduleNameMapper: {
+    '^jose$': '<rootDir>/__mocks__/jose.ts',
+  },
 };
 
 export default config;
