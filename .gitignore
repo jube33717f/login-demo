@@ -2,10 +2,14 @@ node_modules
 dist
 coverage
 .env.local
+.env.e2e
+.env.e2e.local
 .DS_Store
 playwright-report
 test-results
 apps/*/.env.local
+apps/*/.env.e2e
+apps/*/.env.e2e.local
 apps/*/dist
 apps/*/coverage
 apps/*/node_modules

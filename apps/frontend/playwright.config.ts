@@ -7,11 +7,7 @@ import dotenv from 'dotenv';
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 dotenv.config({
-  path: [
-    path.resolve(dirname, '.env'),
-    path.resolve(dirname, '.env.e2e.local'),
-    path.resolve(dirname, '.env.e2e'),
-  ],
+  path: [path.resolve(dirname, '.env'), path.resolve(dirname, '.env.local')],
 });
 
 export default defineConfig({
