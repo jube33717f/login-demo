@@ -1,0 +1,85 @@
+.panel {
+  width: 100%;
+  max-width: 680px;
+  padding: 32px;
+  border: 1px solid #d9e2ec;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(21, 33, 54, 0.08);
+}
+
+.label {
+  margin: 0 0 10px;
+  color: #4b667f;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: #102033;
+  font-size: 32px;
+  line-height: 1.15;
+}
+
+.copy {
+  margin: 16px 0 24px;
+  color: #52677a;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border: 1px solid #0f5c8f;
+  background: #0f5c8f;
+  color: #ffffff;
+}
+
+.secondaryButton {
+  border: 1px solid #b8c7d6;
+  background: #ffffff;
+  color: #102033;
+}
+
+.userDetails {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.userDetails div {
+  padding: 12px;
+  border: 1px solid #edf2f7;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.userDetails dt {
+  margin-bottom: 4px;
+  color: #5d7489;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.userDetails dd {
+  margin: 0;
+  color: #102033;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
