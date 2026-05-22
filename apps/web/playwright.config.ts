@@ -1,13 +1,16 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
+const dirname = path.dirname(fileURLToPath(import.meta.url));
+
 dotenv.config({
   path: [
-    path.resolve(__dirname, '.env'),
-    path.resolve(__dirname, '.env.e2e.local'),
-    path.resolve(__dirname, '.env.e2e'),
+    path.resolve(dirname, '.env'),
+    path.resolve(dirname, '.env.e2e.local'),
+    path.resolve(dirname, '.env.e2e'),
   ],
 });
 
@@ -27,4 +30,9 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
+  webServer: {
+    command: 'pnpm dev',
+    url: 'http://localhost:4200',
+    reuseExistingServer: !process.env.CI,
+  },
 });
