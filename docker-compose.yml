@@ -1,0 +1,48 @@
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    env_file:
+      - apps/api/.env
+    environment:
+      APP_PORT: "3000"
+      REDIS_URL: redis://redis:6379
+      FRONTEND_ORIGIN: http://localhost:4200
+      OIDC_REDIRECT_URI: http://localhost:4200/callback
+    ports:
+      - "3000:3000"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  web:
+    profiles: ["full"]
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    env_file:
+      - apps/web/.env
+    environment:
+      VITE_API_BASE_URL: ""
+    ports:
+      - "4200:4200"
+    depends_on:
+      - api
+
+volumes:
+  redis-data:

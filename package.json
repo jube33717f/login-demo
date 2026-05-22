@@ -1,0 +1,24 @@
+{
+  "name": "oauth-pkce-demo",
+  "private": true,
+  "packageManager": "pnpm@10.15.1",
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api dev",
+    "build:web": "pnpm --filter web build",
+    "build:api": "pnpm --filter api build",
+    "test:web": "pnpm --filter web test",
+    "test:api": "pnpm --filter api test",
+    "test:e2e:web": "pnpm --filter web e2e",
+    "test:e2e:api": "pnpm --filter api test:e2e",
+    "lint:web": "pnpm --filter web lint",
+    "lint:api": "pnpm --filter api lint",
+    "docker:up": "docker compose --profile full up --build",
+    "docker:redis": "docker compose up -d redis",
+    "docker:down": "docker compose down"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  }
+}
