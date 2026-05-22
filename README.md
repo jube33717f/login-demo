@@ -258,14 +258,18 @@ pnpm test:e2e:frontend
 
 ## E2E Login Strategy
 
-Automated e2e tests should not depend on a long-lived shared username and password. If full IdP login coverage is required, the preferred strategy is:
+The ideal e2e login strategy is to avoid any long-lived shared username and password. If the IdP supports user provisioning through an admin API, test API, SCIM, or another approved enterprise user management path, full login e2e tests should:
 
-1. Create a short-lived test user through an approved IdP admin or test API before the test run.
+1. Create a short-lived test user before the test run.
 2. Use that generated account only for the current test run.
 3. Delete or disable the test user during teardown.
-4. Store any IdP admin API credentials only in the CI secret store or a local-only `.env.local` file.
+4. Store any IdP provisioning credentials only in the CI secret store or a local-only `.env.local` file.
 
-The current Playwright test avoids real IdP login and verifies the anonymous application state with network stubbing. This keeps local e2e tests deterministic and avoids committing test account credentials. Manual IdP login can still be validated with an account provided through a secure team channel.
+This repository does not implement user registration, and the current IdP provisioning capability is not part of the project scope. Because e2e tests should not require manual account setup on every run, the temporary strategy for real IdP login coverage is to use one dedicated test account managed outside the repository.
+
+That temporary account must not be committed to source control. Store its username and password only in CI secrets or a local-only `.env.local` file, rotate it when access changes, and keep it limited to the minimum permissions required for login testing.
+
+The current Playwright test avoids real IdP login and verifies the anonymous application state with network stubbing. This keeps local e2e tests deterministic while the project does not own automated IdP user lifecycle management.
 
 ## Notes and Tradeoffs
 
