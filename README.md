@@ -67,6 +67,7 @@ Do not commit secrets, passwords, personal test accounts, or e2e-only env files.
 Backend environment defaults live in `apps/backend/.env.example`.
 
 ```bash
+SERVICE=oauth-pkce-demo-api
 APP_PORT=3000
 FRONTEND_ORIGIN=http://localhost:4200
 OIDC_DISCOVERY_URL=https://auth.dev.leap.services/.well-known/openid-configuration
