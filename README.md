@@ -256,9 +256,16 @@ Frontend Playwright tests:
 pnpm test:e2e:frontend
 ```
 
-## Test Account
+## E2E Login Strategy
 
-Use an IdP test account provided through the interview instructions or your secure team channel. Do not commit usernames, passwords, or e2e-specific env files to this repository.
+Automated e2e tests should not depend on a long-lived shared username and password. If full IdP login coverage is required, the preferred strategy is:
+
+1. Create a short-lived test user through an approved IdP admin or test API before the test run.
+2. Use that generated account only for the current test run.
+3. Delete or disable the test user during teardown.
+4. Store any IdP admin API credentials only in the CI secret store or a local-only `.env.local` file.
+
+The current Playwright test avoids real IdP login and verifies the anonymous application state with network stubbing. This keeps local e2e tests deterministic and avoids committing test account credentials. Manual IdP login can still be validated with an account provided through a secure team channel.
 
 ## Notes and Tradeoffs
 
