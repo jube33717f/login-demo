@@ -270,7 +270,19 @@ This repository does not implement user registration, and the current IdP provis
 
 That temporary account must not be committed to source control. Store its username and password only in CI secrets or a local-only `.env.local` file, rotate it when access changes, and keep it limited to the minimum permissions required for login testing.
 
-The current Playwright test avoids real IdP login and verifies the anonymous application state with network stubbing. This keeps local e2e tests deterministic while the project does not own automated IdP user lifecycle management.
+The current Playwright suite includes two frontend e2e paths:
+
+- `auth-flow.spec.ts` verifies the anonymous application state with network stubbing. This keeps local e2e tests deterministic.
+- `real-login.spec.ts` performs a real browser login against the IdP when local credentials are provided.
+
+To run the real login test locally, create `apps/frontend/.env.local` with a dedicated test account managed outside the repository:
+
+```bash
+E2E_LOGIN_USERNAME=
+E2E_LOGIN_PASSWORD=
+```
+
+When these variables are not set, the real login test is skipped. Do not commit this file or these values.
 
 ## Notes and Tradeoffs
 
