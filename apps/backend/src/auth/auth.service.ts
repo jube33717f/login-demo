@@ -39,12 +39,15 @@ export class AuthService {
     const params = new URLSearchParams({
       response_type: 'code',
       client_id: this.config.get('oidc.clientId'),
-      redirect_uri: this.config.get('oidc.redirectUri'),
       scope: this.config.get('oidc.scopes'),
       state: transaction.state,
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
     });
+    const redirectUri = this.config.get('oidc.redirectUri');
+    if (redirectUri) {
+      params.set('redirect_uri', redirectUri);
+    }
 
     return `${oidc.authorization_endpoint}?${params.toString()}`;
   }
@@ -98,9 +101,12 @@ export class AuthService {
       grant_type: 'authorization_code',
       client_id: this.config.get('oidc.clientId'),
       code: input.code,
-      redirect_uri: this.config.get('oidc.redirectUri'),
       code_verifier: input.codeVerifier,
     });
+    const redirectUri = this.config.get('oidc.redirectUri');
+    if (redirectUri) {
+      body.set('redirect_uri', redirectUri);
+    }
 
     try {
       const { data } = await firstValueFrom(

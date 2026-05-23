@@ -1,12 +1,13 @@
 import { expect, type Locator, type Page, test } from '@playwright/test';
 
+const realLoginEnabled = process.env.E2E_REAL_LOGIN === 'true';
 const username = process.env.E2E_LOGIN_USERNAME;
 const password = process.env.E2E_LOGIN_PASSWORD;
 
 test.describe('real IdP login', () => {
   test.skip(
-    !username || !password,
-    'Set E2E_LOGIN_USERNAME and E2E_LOGIN_PASSWORD in apps/frontend/.env.local to run the real IdP login test.',
+    !realLoginEnabled || !username || !password,
+    'Set E2E_REAL_LOGIN=true plus E2E_LOGIN_USERNAME and E2E_LOGIN_PASSWORD in apps/frontend/.env.local to run the real IdP login test.',
   );
 
   test('signs in through the IdP and loads protected data', async ({ page }) => {
@@ -15,41 +16,10 @@ test.describe('real IdP login', () => {
 
     await expect(page).not.toHaveURL(/localhost:4200\/$/, { timeout: 30_000 });
 
-    await fillFirstVisible(
-      page,
-      [
-        page.getByLabel(/email|username/i),
-        page.getByPlaceholder(/email|username/i),
-        page.locator('input[type="email"]'),
-        page.locator('input[name*="email" i]'),
-        page.locator('input[name*="user" i]'),
-        page.locator('input[id*="email" i]'),
-        page.locator('input[id*="user" i]'),
-      ],
-      username!,
-      'username',
-    );
-
-    if (!(await hasVisible(page.locator('input[type="password"]')))) {
-      await clickFirstVisible(page, [
-        page.getByRole('button', { name: /continue|next/i }),
-        page.locator('button[type="submit"]'),
-        page.locator('input[type="submit"]'),
-      ]);
-    }
-
-    await fillFirstVisible(
-      page,
-      [
-        page.getByLabel(/password/i),
-        page.getByPlaceholder(/password/i),
-        page.locator('input[type="password"]'),
-        page.locator('input[name*="password" i]'),
-        page.locator('input[id*="password" i]'),
-      ],
-      password!,
-      'password',
-    );
+    await expect(page.getByRole('heading', { name: 'Sign In' })).toBeVisible();
+    const loginForm = page.locator('form').first();
+    await loginForm.locator('input').nth(0).fill(username!, { force: true });
+    await loginForm.locator('input').nth(1).fill(password!, { force: true });
 
     await clickFirstVisible(page, [
       page.getByRole('button', { name: /log in|login|sign in|continue|submit/i }),
@@ -65,20 +35,6 @@ test.describe('real IdP login', () => {
     await expect(page.getByText('Validate protected API access')).toBeVisible();
   });
 });
-
-async function fillFirstVisible(
-  page: Page,
-  locators: Locator[],
-  value: string,
-  fieldName: string,
-) {
-  const locator = await firstVisible(locators);
-  if (!locator) {
-    throw new Error(`Could not find a visible ${fieldName} field on ${page.url()}`);
-  }
-
-  await locator.fill(value);
-}
 
 async function clickFirstVisible(page: Page, locators: Locator[]) {
   const locator = await firstVisible(locators);

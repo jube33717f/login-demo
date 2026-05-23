@@ -35,9 +35,9 @@ const schema = (<T>(config: Schema<T>) => config)({
       env: 'OIDC_CLIENT_ID',
     },
     redirectUri: {
-      doc: 'OIDC redirect URI',
-      format: 'url',
-      default: 'http://localhost:4200/callback',
+      doc: 'OIDC redirect URI. Leave empty to let the IdP use the client default redirect URI.',
+      format: String,
+      default: '',
       env: 'OIDC_REDIRECT_URI',
     },
     scopes: {

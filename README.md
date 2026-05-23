@@ -72,7 +72,7 @@ APP_PORT=3000
 FRONTEND_ORIGIN=http://localhost:4200
 OIDC_DISCOVERY_URL=https://auth.dev.leap.services/.well-known/openid-configuration
 OIDC_CLIENT_ID=PVLUM9TIKCASF2BG
-OIDC_REDIRECT_URI=http://localhost:4200/callback
+OIDC_REDIRECT_URI=
 OIDC_SCOPES=openid profile email
 SESSION_COOKIE_NAME=sid
 SESSION_TTL_SECONDS=3600
@@ -92,7 +92,7 @@ Backend variables:
 | `FRONTEND_ORIGIN` | Allowed browser origin for CORS and redirects. Local development uses `http://localhost:4200`. |
 | `OIDC_DISCOVERY_URL` | IdP OIDC discovery document URL. |
 | `OIDC_CLIENT_ID` | Public OAuth client ID registered with the IdP. |
-| `OIDC_REDIRECT_URI` | Redirect URI registered with the IdP. It must match the IdP configuration exactly. |
+| `OIDC_REDIRECT_URI` | Optional explicit redirect URI. Leave empty for the provided interview IdP so it can use the client default redirect URI. Set it only when the IdP confirms an exact allowed callback URL. |
 | `OIDC_SCOPES` | Space-separated OAuth scopes requested during login. |
 | `SESSION_COOKIE_NAME` | HttpOnly session cookie name. |
 | `SESSION_TTL_SECONDS` | Session TTL used by Redis or the in-memory fallback. |
@@ -101,6 +101,8 @@ Backend variables:
 | `REDIS_URL` | Redis connection URL. Local Docker Redis uses `redis://localhost:6379`; full Docker mode uses `redis://redis:6379`. |
 | `REDIS_PASSWORD` | Redis password when the Redis instance requires authentication. Leave empty for the provided local Docker Redis. |
 | `OAUTH_TRANSACTION_TTL_SECONDS` | TTL for short-lived OAuth state and PKCE transaction data. |
+
+For the provided interview IdP, `OIDC_REDIRECT_URI` is intentionally empty. The assignment gives the discovery URL and client ID, but does not provide an exact registered callback URL. Probing the IdP shows that explicitly sending `http://localhost:4200/callback` returns `403 Forbidden`, while omitting `redirect_uri` lets the IdP use the client default and proceed to authentication.
 
 Frontend environment defaults live in `apps/frontend/.env.example`.
 
@@ -278,11 +280,14 @@ The current Playwright suite includes two frontend e2e paths:
 To run the real login test locally, create `apps/frontend/.env.local` with a dedicated test account managed outside the repository:
 
 ```bash
+E2E_REAL_LOGIN=false
 E2E_LOGIN_USERNAME=
 E2E_LOGIN_PASSWORD=
 ```
 
-When these variables are not set, the real login test is skipped. Do not commit this file or these values.
+The real login test is opt-in. Keep `E2E_REAL_LOGIN=false` for normal automated runs. Set it to `true` only when intentionally validating the live IdP in Playwright UI. Do not commit this file or these values.
+
+The provided interview IdP also has two practical constraints observed during local validation: explicitly sending a localhost `redirect_uri` returns `403 Forbidden`, so this app leaves `OIDC_REDIRECT_URI` empty and lets the IdP use the client default; automated form submission may still be blocked by the IdP's live anti-automation controls. The deterministic e2e path remains `auth-flow.spec.ts`.
 
 ## Notes and Tradeoffs
 
