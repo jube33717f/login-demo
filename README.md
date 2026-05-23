@@ -70,6 +70,8 @@ Backend environment defaults live in `apps/backend/.env.example`.
 SERVICE=oauth-pkce-demo-api
 APP_PORT=3000
 FRONTEND_ORIGIN=http://localhost:4200
+LOG_LEVEL=info
+LOG_PRETTY=true
 OIDC_DISCOVERY_URL=https://auth.dev.leap.services/.well-known/openid-configuration
 OIDC_CLIENT_ID=PVLUM9TIKCASF2BG
 OIDC_REDIRECT_URI=
@@ -90,6 +92,8 @@ Backend variables:
 | `SERVICE` | Service name used for logging and diagnostics. |
 | `APP_PORT` | Backend HTTP port. Local development uses `3000`. |
 | `FRONTEND_ORIGIN` | Allowed browser origin for CORS and redirects. Local development uses `http://localhost:4200`. |
+| `LOG_LEVEL` | Pino log level. Use `info` for normal development and `debug` when diagnosing OAuth or Redis behavior. |
+| `LOG_PRETTY` | Enables `pino-pretty` output for local development. Set to `false` for JSON logs. |
 | `OIDC_DISCOVERY_URL` | IdP OIDC discovery document URL. |
 | `OIDC_CLIENT_ID` | Public OAuth client ID registered with the IdP. |
 | `OIDC_REDIRECT_URI` | Optional explicit redirect URI. Leave empty for the provided interview IdP so it can use the client default redirect URI. Set it only when the IdP confirms an exact allowed callback URL. |
@@ -181,6 +185,17 @@ Stop everything:
 ```bash
 pnpm docker:down
 ```
+
+## Logging
+
+The backend uses `pino` through `nestjs-pino`. Local development defaults to `pino-pretty` for readable logs:
+
+```bash
+LOG_LEVEL=info
+LOG_PRETTY=true
+```
+
+Set `LOG_LEVEL=debug` when diagnosing OAuth redirects, token exchange, Redis connection behavior, or guarded route access. Logs redact authorization headers, cookies, and `set-cookie` response headers. Do not log authorization codes, PKCE verifiers, access tokens, ID tokens, passwords, or full session payloads.
 
 ## Redis
 

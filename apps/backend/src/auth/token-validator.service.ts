@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
+import { PinoLogger } from 'nestjs-pino';
 
 import { ConfigService } from '../config/config.service';
 import { OidcDiscoveryService } from './oidc-discovery.service';
@@ -13,7 +14,10 @@ export class TokenValidatorService {
   constructor(
     private readonly config: ConfigService,
     private readonly discovery: OidcDiscoveryService,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(TokenValidatorService.name);
+  }
 
   async validateIdToken(idToken: string): Promise<{
     user: ValidatedUser;
@@ -24,6 +28,7 @@ export class TokenValidatorService {
     if (!this.jwks || this.jwksUri !== oidc.jwks_uri) {
       this.jwksUri = oidc.jwks_uri;
       this.jwks = createRemoteJWKSet(new URL(oidc.jwks_uri));
+      this.logger.debug({ jwksUri: oidc.jwks_uri }, 'Created remote JWKS verifier');
     }
 
     try {
@@ -36,6 +41,8 @@ export class TokenValidatorService {
       if (!sub) {
         throw new UnauthorizedException('ID token missing sub claim');
       }
+
+      this.logger.info({ issuer: oidc.issuer, audience: this.config.get('oidc.clientId'), userSub: sub }, 'Validated ID token');
 
       return {
         payload,
@@ -53,6 +60,7 @@ export class TokenValidatorService {
         throw error;
       }
 
+      this.logger.warn(this.errorContext(error), 'ID token validation failed');
       throw new UnauthorizedException('Invalid ID token');
     }
   }
@@ -60,5 +68,14 @@ export class TokenValidatorService {
   private stringClaim(payload: JWTPayload, claim: string): string | undefined {
     const value = payload[claim];
     return typeof value === 'string' ? value : undefined;
+  }
+
+  private errorContext(error: unknown): Record<string, unknown> {
+    if (typeof error !== 'object' || error === null) {
+      return { error };
+    }
+
+    const maybeError = error as { message?: string; code?: string };
+    return { message: maybeError.message, code: maybeError.code };
   }
 }

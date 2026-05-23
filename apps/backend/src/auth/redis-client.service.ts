@@ -1,22 +1,23 @@
-import {
-  Injectable,
-  Logger,
-  OnApplicationShutdown,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
+import { PinoLogger } from 'nestjs-pino';
 import { createClient, type RedisClientType } from 'redis';
 
 import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class RedisClientService implements OnModuleInit, OnApplicationShutdown {
-  private readonly logger = new Logger(RedisClientService.name);
   private client?: RedisClientType;
 
-  constructor(private readonly config: ConfigService) {}
+  constructor(
+    private readonly config: ConfigService,
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(RedisClientService.name);
+  }
 
   async onModuleInit(): Promise<void> {
     if (this.config.get('session.store') !== 'redis') {
+      this.logger.info('Redis session store disabled');
       return;
     }
 
@@ -26,15 +27,17 @@ export class RedisClientService implements OnModuleInit, OnApplicationShutdown {
     });
 
     this.client.on('error', (error) => {
-      this.logger.error(`Redis error: ${error.message}`);
+      this.logger.error({ message: error.message }, 'Redis client error');
     });
 
     await this.client.connect();
+    this.logger.info({ redisUrl: this.config.get('redis.url') }, 'Connected to Redis');
   }
 
   async onApplicationShutdown(): Promise<void> {
     if (this.client?.isOpen) {
       await this.client.quit();
+      this.logger.info('Redis connection closed');
     }
   }
 

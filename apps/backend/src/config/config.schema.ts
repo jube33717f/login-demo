@@ -21,6 +21,20 @@ const schema = (<T>(config: Schema<T>) => config)({
       env: 'FRONTEND_ORIGIN',
     },
   },
+  logging: {
+    level: {
+      doc: 'Application log level',
+      format: ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'],
+      default: 'info',
+      env: 'LOG_LEVEL',
+    },
+    pretty: {
+      doc: 'Enable pino-pretty output for local development',
+      format: Boolean,
+      default: true,
+      env: 'LOG_PRETTY',
+    },
+  },
   oidc: {
     discoveryUrl: {
       doc: 'OIDC discovery document URL',

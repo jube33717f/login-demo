@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { PinoLogger } from 'nestjs-pino';
 import { firstValueFrom } from 'rxjs';
 
 import { ConfigService } from '../config/config.service';
@@ -25,7 +26,10 @@ export class AuthService {
     private readonly stateStore: StateStoreService,
     private readonly sessionStore: SessionStoreService,
     private readonly tokenValidator: TokenValidatorService,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(AuthService.name);
+  }
 
   async buildAuthorizationUrl(): Promise<string> {
     const oidc = await this.discovery.getConfiguration();
@@ -49,6 +53,16 @@ export class AuthService {
       params.set('redirect_uri', redirectUri);
     }
 
+    this.logger.info(
+      {
+        authorizationEndpoint: oidc.authorization_endpoint,
+        clientId: this.config.get('oidc.clientId'),
+        scopes: this.config.get('oidc.scopes'),
+        usesExplicitRedirectUri: Boolean(redirectUri),
+      },
+      'Building OIDC authorization URL',
+    );
+
     return `${oidc.authorization_endpoint}?${params.toString()}`;
   }
 
@@ -57,7 +71,17 @@ export class AuthService {
     state?: string;
     error?: string;
   }): Promise<AuthSession> {
+    this.logger.info(
+      {
+        hasCode: Boolean(query.code),
+        hasState: Boolean(query.state),
+        hasError: Boolean(query.error),
+      },
+      'Handling OIDC callback',
+    );
+
     if (query.error) {
+      this.logger.warn({ oidcError: query.error }, 'OIDC callback returned an error');
       throw new BadRequestException('OIDC authorization failed');
     }
 
@@ -83,13 +107,23 @@ export class AuthService {
       tokenResponse.id_token,
     );
 
-    return this.sessionStore.create({
+    const session = await this.sessionStore.create({
       user,
       accessToken: tokenResponse.access_token,
       idToken: tokenResponse.id_token,
       expiresAt:
         typeof payload.exp === 'number' ? payload.exp * 1000 : undefined,
     });
+
+    this.logger.info(
+      {
+        userSub: user.sub,
+        sessionExpiresAt: new Date(session.expiresAt).toISOString(),
+      },
+      'Created authenticated session',
+    );
+
+    return session;
   }
 
   private async exchangeCode(input: {
@@ -107,6 +141,14 @@ export class AuthService {
     if (redirectUri) {
       body.set('redirect_uri', redirectUri);
     }
+
+    this.logger.debug(
+      {
+        tokenEndpoint: oidc.token_endpoint,
+        usesExplicitRedirectUri: Boolean(redirectUri),
+      },
+      'Exchanging authorization code for tokens',
+    );
 
     try {
       const { data } = await firstValueFrom(
@@ -127,7 +169,27 @@ export class AuthService {
         throw error;
       }
 
+      this.logger.error(this.errorContext(error), 'Token exchange failed');
       throw new BadGatewayException('Token exchange failed');
     }
+  }
+
+  private errorContext(error: unknown): Record<string, unknown> {
+    if (typeof error !== 'object' || error === null) {
+      return { error };
+    }
+
+    const maybeHttpError = error as {
+      message?: string;
+      code?: string;
+      response?: { status?: number; data?: unknown };
+    };
+
+    return {
+      message: maybeHttpError.message,
+      code: maybeHttpError.code,
+      responseStatus: maybeHttpError.response?.status,
+      responseData: maybeHttpError.response?.data,
+    };
   }
 }
