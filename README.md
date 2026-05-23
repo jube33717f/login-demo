@@ -74,7 +74,7 @@ LOG_LEVEL=info
 LOG_PRETTY=true
 OIDC_DISCOVERY_URL=https://auth.dev.leap.services/.well-known/openid-configuration
 OIDC_CLIENT_ID=PVLUM9TIKCASF2BG
-OIDC_REDIRECT_URI=
+OIDC_REDIRECT_URI=http://localhost:4200/callback
 OIDC_SCOPES=openid profile email
 SESSION_COOKIE_NAME=sid
 SESSION_TTL_SECONDS=3600
@@ -96,7 +96,7 @@ Backend variables:
 | `LOG_PRETTY` | Enables `pino-pretty` output for local development. Set to `false` for JSON logs. |
 | `OIDC_DISCOVERY_URL` | IdP OIDC discovery document URL. |
 | `OIDC_CLIENT_ID` | Public OAuth client ID registered with the IdP. |
-| `OIDC_REDIRECT_URI` | Optional explicit redirect URI. Leave empty for the provided interview IdP so it can use the client default redirect URI. Set it only when the IdP confirms an exact allowed callback URL. |
+| `OIDC_REDIRECT_URI` | Explicit callback URL sent to the IdP. Local development uses `http://localhost:4200/callback`. |
 | `OIDC_SCOPES` | Space-separated OAuth scopes requested during login. |
 | `SESSION_COOKIE_NAME` | HttpOnly session cookie name. |
 | `SESSION_TTL_SECONDS` | Session TTL used by Redis or the in-memory fallback. |
@@ -106,7 +106,7 @@ Backend variables:
 | `REDIS_PASSWORD` | Redis password when the Redis instance requires authentication. Leave empty for the provided local Docker Redis. |
 | `OAUTH_TRANSACTION_TTL_SECONDS` | TTL for short-lived OAuth state and PKCE transaction data. |
 
-For the provided interview IdP, `OIDC_REDIRECT_URI` is intentionally empty. The assignment gives the discovery URL and client ID, but does not provide an exact registered callback URL. Probing the IdP shows that explicitly sending `http://localhost:4200/callback` returns `403 Forbidden`, while omitting `redirect_uri` lets the IdP use the client default and proceed to authentication.
+For the provided interview IdP, the application sends `http://localhost:4200/callback`, matching the local callback required by the assignment. During local validation, the live IdP edge currently returns an AWS ALB `403 Forbidden` before the request reaches the IdP application when this literal localhost redirect URI is present. Omitting `redirect_uri` reaches the login page but fails after credential submission because the IdP cannot complete the authorization response. Alternate loopback hostnames such as `lvh.me` and IPv6 loopback can pass the ALB layer, but the IdP then rejects them as a mismatching redirect URI. This points to an IdP client registration or edge allowlist issue rather than an application-side PKCE/state generation issue.
 
 Frontend environment defaults live in `apps/frontend/.env.example`.
 
@@ -302,7 +302,7 @@ E2E_LOGIN_PASSWORD=
 
 The real login test is opt-in. Keep `E2E_REAL_LOGIN=false` for normal automated runs. Set it to `true` only when intentionally validating the live IdP in Playwright UI. Do not commit this file or these values.
 
-The provided interview IdP also has two practical constraints observed during local validation: explicitly sending a localhost `redirect_uri` returns `403 Forbidden`, so this app leaves `OIDC_REDIRECT_URI` empty and lets the IdP use the client default; automated form submission may still be blocked by the IdP's live anti-automation controls. The deterministic e2e path remains `auth-flow.spec.ts`.
+The provided interview IdP currently rejects the assignment callback `http://localhost:4200/callback` at the AWS ALB layer. The real login test is kept as an opt-in diagnostic so the full browser flow can be rerun once the IdP client registration or edge allowlist is corrected. The deterministic `auth-flow.spec.ts` test remains the default frontend e2e path.
 
 ## Notes and Tradeoffs
 
@@ -310,4 +310,4 @@ The provided interview IdP also has two practical constraints observed during lo
 - A relational database is not used for sessions because this data is not business data and does not need relational querying.
 - Refresh token rotation is out of scope. Sessions expire with the token lifetime or fallback session TTL.
 - IdP global logout is out of scope. `POST /logout` clears only the local application session.
-- Public deployment is intentionally not configured because the allowed IdP redirect URIs have not been confirmed.
+- Public deployment is intentionally not configured because production redirect URIs have not been confirmed.
