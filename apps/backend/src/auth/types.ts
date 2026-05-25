@@ -4,6 +4,7 @@ export type OidcConfiguration = {
   token_endpoint: string;
   jwks_uri: string;
   userinfo_endpoint?: string;
+  end_session_endpoint?: string;
 };
 
 export type LoginTransaction = {

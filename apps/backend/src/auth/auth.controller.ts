@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  HttpCode,
   Post,
   Query,
   Redirect,
@@ -53,6 +54,7 @@ export class AuthController {
   }
 
   @Post('/logout')
+  @HttpCode(200)
   async logout(@Req() request: Request, @Res() response: Response) {
     const cookieName = this.config.get('session.cookieName');
     const sid = request.cookies?.[cookieName];
@@ -60,5 +62,17 @@ export class AuthController {
     await this.sessions.delete(sid);
     response.clearCookie(cookieName, { path: '/' });
     response.json({ ok: true });
+  }
+
+  @Get('/logout')
+  async browserLogout(@Req() request: Request, @Res() response: Response) {
+    const cookieName = this.config.get('session.cookieName');
+    const sid = request.cookies?.[cookieName];
+    const session = await this.sessions.get(sid);
+    const logoutUrl = await this.auth.buildLogoutUrl(session);
+
+    await this.sessions.delete(sid);
+    response.clearCookie(cookieName, { path: '/' });
+    response.redirect(logoutUrl ?? '/');
   }
 }

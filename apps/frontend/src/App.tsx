@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { getMe, logout, UnauthorizedError } from './api/client';
+import { getMe, UnauthorizedError } from './api/client';
 import styles from './App.module.css';
 import { AuthPanel } from './components/AuthPanel';
 import { ProtectedDataPanel } from './components/ProtectedDataPanel';
@@ -42,9 +42,8 @@ export function App() {
     }
   }
 
-  async function handleLogout() {
-    await logout();
-    setAuth({ status: 'anonymous' });
+  function handleLogout() {
+    window.location.assign('/logout');
   }
 
   return (

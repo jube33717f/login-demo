@@ -22,6 +22,7 @@ http://localhost:4200
 - Stores OAuth state and sessions in Redis with TTL
 - Exposes `GET /me` for the authenticated user
 - Exposes `GET /api/data` as a protected API route
+- Clears the local session and redirects to the IdP logout endpoint when available
 - Returns `401 Unauthorized` for unauthenticated protected requests
 - Keeps tokens out of browser URLs, localStorage, and sessionStorage
 
@@ -232,6 +233,12 @@ PONG
 10. The API validates the ID token signature and claims.
 11. The API creates a Redis-backed session and sets an HttpOnly cookie.
 12. The frontend app calls `/me` and `/api/data`.
+
+## Logout Flow
+
+The browser logout flow uses `GET /logout`. The API reads the HttpOnly session cookie, deletes the server-side session, clears the cookie, and redirects to the IdP `end_session_endpoint` when the discovery document provides one. If the IdP does not advertise a logout endpoint, the API redirects back to `/`.
+
+`POST /logout` is also available for API-style local logout. It deletes the local session, clears the cookie, and returns `{ "ok": true }`.
 
 ## Token Storage
 

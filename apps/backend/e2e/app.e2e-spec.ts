@@ -64,6 +64,31 @@ describe('API e2e', () => {
       });
   });
 
+  it('clears local sessions on POST /logout', async () => {
+    const session = await sessions.create({
+      user: {
+        sub: 'user-1',
+        claims: { sub: 'user-1' },
+      },
+      accessToken: 'access-token',
+      idToken: 'id-token',
+    });
+
+    await request(app.getHttpServer())
+      .post('/logout')
+      .set('Cookie', [`sid=${session.id}`])
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.ok).toBe(true);
+      });
+
+    await expect(sessions.get(session.id)).resolves.toBeNull();
+  });
+
+  it('redirects anonymous browser logout requests home', async () => {
+    await request(app.getHttpServer()).get('/logout').expect(302).expect('Location', '/');
+  });
+
   it('rejects callback requests without code', async () => {
     await request(app.getHttpServer()).get('/callback?state=state').expect(400);
   });
