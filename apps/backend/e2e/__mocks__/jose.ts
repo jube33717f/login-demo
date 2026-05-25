@@ -12,3 +12,17 @@ export async function jwtVerify() {
     },
   };
 }
+
+function decodeBase64UrlJson(segment: string) {
+  return JSON.parse(Buffer.from(segment, 'base64url').toString('utf8'));
+}
+
+export function decodeProtectedHeader(token: string) {
+  const [header] = token.split('.');
+  return decodeBase64UrlJson(header);
+}
+
+export function decodeJwt(token: string) {
+  const [, payload] = token.split('.');
+  return decodeBase64UrlJson(payload);
+}
