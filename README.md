@@ -110,7 +110,6 @@ Backend variables:
 Frontend environment defaults live in `apps/frontend/.env.example`.
 
 ```bash
-VITE_APP_BASE_URL=http://localhost:4200
 VITE_API_BASE_URL=
 VITE_E2E=false
 ```
@@ -119,7 +118,6 @@ Frontend variables:
 
 | Variable | Purpose |
 | --- | --- |
-| `VITE_APP_BASE_URL` | Browser-facing frontend origin. Local development uses `http://localhost:4200`. |
 | `VITE_API_BASE_URL` | API base URL used by the frontend. Leave empty when Vite proxies API requests to the backend. |
 | `VITE_E2E` | Enables frontend test-only UI behavior when explicitly set to `true`. Keep `false` for normal development. |
 
