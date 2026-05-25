@@ -236,9 +236,9 @@ PONG
 
 ## Logout Flow
 
-The app logout button calls `POST /logout`, waits for `{ "ok": true }`, then returns the browser to `/`. The API deletes the server-side session and clears the HttpOnly cookie.
+The app logout button uses `GET /logout`. The API deletes the server-side session, clears the HttpOnly cookie, loads the IdP `end_session_endpoint` when the discovery document provides one, and returns the browser to `/`.
 
-`GET /logout` is also available as a browser logout route. It clears the local session and redirects to the IdP `end_session_endpoint` when the discovery document provides one, falling back to `/` otherwise.
+`POST /logout` is also available for API-style local logout. It deletes the local session, clears the cookie, and returns `{ "ok": true }`.
 
 ## Token Storage
 

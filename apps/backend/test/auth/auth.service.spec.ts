@@ -3,7 +3,7 @@ import type { AuthSession } from '../../src/auth/types';
 import { ConfigService } from '../../src/config/config.service';
 
 describe('AuthService', () => {
-  it('builds an IdP logout URL that returns to the app home page', async () => {
+  it('builds an IdP logout URL from discovery', async () => {
     const config = {
       get: jest.fn((key: string) => {
         const values: Record<string, string> = {
@@ -33,7 +33,24 @@ describe('AuthService', () => {
     } as AuthSession;
 
     await expect(service.buildLogoutUrl(session)).resolves.toBe(
-      'https://auth.example.test/oauth/logout?id_token_hint=id-token&post_logout_redirect_uri=http%3A%2F%2Flocalhost%3A4200%2F',
+      'https://auth.example.test/oauth/logout',
     );
+  });
+
+  it('builds a logout completion page that returns home', () => {
+    const service = new AuthService(
+      {} as ConfigService,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      { setContext: jest.fn() } as never,
+    );
+
+    expect(
+      service.buildLogoutCompletionPage('https://auth.example.test/oauth/logout'),
+    ).toContain("window.location.replace('/')");
   });
 });

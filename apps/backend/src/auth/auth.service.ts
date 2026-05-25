@@ -136,12 +136,27 @@ export class AuthService {
       return null;
     }
 
-    const params = new URLSearchParams({
-      id_token_hint: session.idToken,
-      post_logout_redirect_uri: new URL('/', this.config.get('frontend.origin')).toString(),
-    });
+    return oidc.end_session_endpoint;
+  }
 
-    return `${oidc.end_session_endpoint}?${params.toString()}`;
+  buildLogoutCompletionPage(logoutUrl: string): string {
+    const escapedLogoutUrl = JSON.stringify(logoutUrl);
+
+    return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Signing out</title>
+  </head>
+  <body>
+    <iframe src=${escapedLogoutUrl} hidden aria-hidden="true"></iframe>
+    <script>
+      const returnHome = () => window.location.replace('/');
+      window.setTimeout(returnHome, 1200);
+      document.querySelector('iframe').addEventListener('load', returnHome, { once: true });
+    </script>
+  </body>
+</html>`;
   }
 
   private async exchangeCode(input: {

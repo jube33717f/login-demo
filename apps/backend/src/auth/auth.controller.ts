@@ -73,6 +73,12 @@ export class AuthController {
 
     await this.sessions.delete(sid);
     response.clearCookie(cookieName, { path: '/' });
-    response.redirect(logoutUrl ?? '/');
+
+    if (!logoutUrl) {
+      response.redirect('/');
+      return;
+    }
+
+    response.type('html').send(this.auth.buildLogoutCompletionPage(logoutUrl));
   }
 }
