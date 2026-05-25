@@ -56,14 +56,14 @@ pnpm docker:down
 
 ## Environment
 
-Environment files are intentionally simple for this demo. Each app has one checked-in example file and one local runtime file:
+Environment files are intentionally simple for this demo. Each app has one checked-in example file and one ignored local runtime file:
 
 - `apps/backend/.env.example`: backend template committed to the repository
-- `apps/backend/.env`: backend local runtime values used by NestJS and Docker Compose
+- `apps/backend/.env`: backend local runtime values used by NestJS and Docker Compose, ignored by git
 - `apps/frontend/.env.example`: frontend template committed to the repository
-- `apps/frontend/.env`: frontend local runtime values used by Vite and Docker Compose
+- `apps/frontend/.env`: frontend local runtime values used by Vite and Docker Compose, ignored by git
 
-Do not commit secrets, passwords, personal test accounts, or e2e-only env files. Use `.env.local` for local-only overrides when needed. The repository ignores `.env.local`, `.env.e2e`, and `.env.e2e.local` files.
+Do not commit secrets, passwords, personal test accounts, or local runtime env files. Use `.env.local` for local-only overrides when needed. The repository ignores `.env`, `.env.local`, `.env.e2e`, and `.env.e2e.local` files.
 
 Backend environment defaults live in `apps/backend/.env.example`.
 
@@ -110,7 +110,6 @@ Backend variables:
 Frontend environment defaults live in `apps/frontend/.env.example`.
 
 ```bash
-VITE_API_BASE_URL=
 VITE_E2E=false
 ```
 
@@ -118,7 +117,6 @@ Frontend variables:
 
 | Variable | Purpose |
 | --- | --- |
-| `VITE_API_BASE_URL` | API base URL used by the frontend. Leave empty when Vite proxies API requests to the backend. |
 | `VITE_E2E` | Enables frontend test-only UI behavior when explicitly set to `true`. Keep `false` for normal development. |
 
 For local setup, copy the example files once and adjust values only if your IdP registration or ports differ:
