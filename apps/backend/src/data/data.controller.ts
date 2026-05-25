@@ -16,8 +16,8 @@ export class DataController {
         },
         {
           id: 'task-2',
-          title: 'Validate protected API access',
-          status: 'pending',
+          title: 'Protected API access available',
+          status: 'available',
         },
       ],
     };

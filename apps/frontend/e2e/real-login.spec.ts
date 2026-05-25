@@ -32,7 +32,7 @@ test.describe('real IdP login', () => {
 
     await page.getByRole('button', { name: 'Load data' }).click();
     await expect(page.getByText('Review OAuth login flow')).toBeVisible();
-    await expect(page.getByText('Validate protected API access')).toBeVisible();
+    await expect(page.getByText('Protected API access available')).toBeVisible();
   });
 });
 

@@ -76,6 +76,10 @@
   color: #147a53;
 }
 
+.item strong[data-status='available'] {
+  color: #1f6f9f;
+}
+
 .error {
   margin: 16px 0 0;
   color: #a32929;

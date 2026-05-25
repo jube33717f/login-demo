@@ -10,6 +10,6 @@ export type ProtectedData = {
   items: Array<{
     id: string;
     title: string;
-    status: 'completed' | 'pending';
+    status: 'completed' | 'available';
   }>;
 };

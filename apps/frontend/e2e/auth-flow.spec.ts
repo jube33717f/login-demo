@@ -39,8 +39,8 @@ test('loads authenticated data and starts logout', async ({ page }) => {
           },
           {
             id: 'task-2',
-            title: 'Validate protected API access',
-            status: 'pending',
+            title: 'Protected API access available',
+            status: 'available',
           },
         ],
       }),
@@ -59,6 +59,7 @@ test('loads authenticated data and starts logout', async ({ page }) => {
   await expect(page.getByText('Test User')).toBeVisible();
   await page.getByRole('button', { name: 'Load data' }).click();
   await expect(page.getByText('Review OAuth login flow')).toBeVisible();
+  await expect(page.getByText('Protected API access available')).toBeVisible();
 
   await page.getByRole('button', { name: 'Logout' }).click();
 
