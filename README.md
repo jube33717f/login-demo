@@ -1,6 +1,6 @@
 # OAuth PKCE Demo
 
-This repository implements an enterprise interview exercise for OAuth 2.0 / OIDC authentication using the Authorization Code flow with PKCE.
+This repository implements OAuth 2.0 / OIDC authentication using the Authorization Code flow with PKCE.
 
 The project is a pnpm workspace with two applications:
 
@@ -105,8 +105,6 @@ Backend variables:
 | `REDIS_URL` | Redis connection URL. Local Docker Redis uses `redis://localhost:6379`; full Docker mode uses `redis://redis:6379`. |
 | `REDIS_PASSWORD` | Redis password when the Redis instance requires authentication. Leave empty for the provided local Docker Redis. |
 | `OAUTH_TRANSACTION_TTL_SECONDS` | TTL for short-lived OAuth state and PKCE transaction data. |
-
-For the provided interview IdP, the application sends `http://localhost:4200/callback`, matching the local callback required by the assignment. During local validation, the live IdP edge currently returns an AWS ALB `403 Forbidden` before the request reaches the IdP application when this literal localhost redirect URI is present. Omitting `redirect_uri` reaches the login page but fails after credential submission because the IdP cannot complete the authorization response. Alternate loopback hostnames such as `lvh.me` and IPv6 loopback can pass the ALB layer, but the IdP then rejects them as a mismatching redirect URI. This points to an IdP client registration or edge allowlist issue rather than an application-side PKCE/state generation issue.
 
 Frontend environment defaults live in `apps/frontend/.env.example`.
 
@@ -283,9 +281,9 @@ The ideal e2e login strategy is to avoid any long-lived shared username and pass
 3. Delete or disable the test user during teardown.
 4. Store any IdP provisioning credentials only in the CI secret store or a local-only `.env.local` file.
 
-This repository does not implement user registration, and the current IdP provisioning capability is not part of the project scope. Because e2e tests should not require manual account setup on every run, the temporary strategy for real IdP login coverage is to use one dedicated test account managed outside the repository.
+This repository does not implement user registration, and the current IdP provisioning capability is not part of the project scope. Because e2e tests should not require manual account setup on every run, the current strategy for real IdP login coverage is to use one dedicated test account managed outside the repository.
 
-That temporary account must not be committed to source control. Store its username and password only in CI secrets or a local-only `.env.local` file, rotate it when access changes, and keep it limited to the minimum permissions required for login testing.
+That account must not be committed to source control. Store its username and password only in CI secrets or a local-only `.env.local` file, rotate it when access changes, and keep it limited to the minimum permissions required for login testing.
 
 The current Playwright suite includes two frontend e2e paths:
 
@@ -302,12 +300,4 @@ E2E_LOGIN_PASSWORD=
 
 The real login test is opt-in. Keep `E2E_REAL_LOGIN=false` for normal automated runs. Set it to `true` only when intentionally validating the live IdP in Playwright UI. Do not commit this file or these values.
 
-The provided interview IdP currently rejects the assignment callback `http://localhost:4200/callback` at the AWS ALB layer. The real login test is kept as an opt-in diagnostic so the full browser flow can be rerun once the IdP client registration or edge allowlist is corrected. The deterministic `auth-flow.spec.ts` test remains the default frontend e2e path.
-
-## Notes and Tradeoffs
-
-- Redis is used because OAuth transactions and sessions are short-lived security state with clear TTL behavior.
-- A relational database is not used for sessions because this data is not business data and does not need relational querying.
-- Refresh token rotation is out of scope. Sessions expire with the token lifetime or fallback session TTL.
-- IdP global logout is out of scope. `POST /logout` clears only the local application session.
-- Public deployment is intentionally not configured because production redirect URIs have not been confirmed.
+If the real login test fails before the callback is reached, confirm that the IdP client allows the configured `OIDC_REDIRECT_URI`. The deterministic `auth-flow.spec.ts` test remains the default frontend e2e path.
