@@ -138,7 +138,7 @@ export class AuthService {
 
     const params = new URLSearchParams({
       id_token_hint: session.idToken,
-      post_logout_redirect_uri: this.config.get('frontend.origin'),
+      post_logout_redirect_uri: new URL('/', this.config.get('frontend.origin')).toString(),
     });
 
     return `${oidc.end_session_endpoint}?${params.toString()}`;
