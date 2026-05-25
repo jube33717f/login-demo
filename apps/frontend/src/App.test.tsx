@@ -2,14 +2,16 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { App } from './App';
-import { getMe, UnauthorizedError } from './api/client';
+import { getMe, logout, UnauthorizedError } from './api/client';
 
 jest.mock('./api/client', () => ({
   UnauthorizedError: class UnauthorizedError extends Error {},
   getMe: jest.fn(),
+  logout: jest.fn(),
 }));
 
 const mockedGetMe = jest.mocked(getMe);
+const mockedLogout = jest.mocked(logout);
 
 describe('App', () => {
   const originalLocation = window.location;
@@ -54,18 +56,20 @@ describe('App', () => {
     expect(screen.getByText('user@example.com')).toBeInTheDocument();
   });
 
-  it('starts browser logout for authenticated users', async () => {
+  it('logs out authenticated users and returns home', async () => {
     mockedGetMe.mockResolvedValue({
       sub: 'user-1',
       email: 'user@example.com',
       name: 'Test User',
     });
+    mockedLogout.mockResolvedValue();
 
     render(<App />);
     await screen.findByText('Test User');
 
     await userEvent.click(screen.getByRole('button', { name: 'Logout' }));
 
-    expect(window.location.assign).toHaveBeenCalledWith('/logout');
+    expect(mockedLogout).toHaveBeenCalledTimes(1);
+    expect(window.location.assign).toHaveBeenCalledWith('/');
   });
 });
